@@ -1,0 +1,18 @@
+import requests as r
+import re, urlparse
+from bs4 import BeautifulSoup
+
+page = r.get(URL).text
+
+soup = BeautifulSoup(page, 'html')
+
+links = []
+for a in soup.findall('a',href=True):
+	links.append(a['href'])
+pdfs = [x for x in links if re.search('\.pdf$',x)]
+for p in pdfs:
+	name = urlparse.urlparse(p).path.split('/')[-1]
+	req = r.get(p, stream=True)
+	with open(name, 'wb') as fd:
+		for chunk in req.iter_content(chunk_size=128):
+			fd.write(chunk)
